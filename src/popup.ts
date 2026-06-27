@@ -1,20 +1,21 @@
-const form = document.getElementById("profile-form");
-const emailsContainer = document.getElementById("emails");
-const errors = document.getElementById("errors");
-const status = document.getElementById("status");
+const form = document.getElementById("profile-form") as HTMLFormElement;
+const emailsContainer = document.getElementById("emails") as HTMLDivElement;
+const errors = document.getElementById("errors") as HTMLParagraphElement;
+const statusMessage = document.getElementById("status") as HTMLParagraphElement;
+const addEmail = document.getElementById("add-email") as HTMLButtonElement;
 
-let currentProfile = { ...DEFAULT_PROFILE };
-let currentSettings = { ...DEFAULT_SETTINGS };
+let currentProfile: Profile = { ...DEFAULT_PROFILE };
+let currentSettings: Settings = { ...DEFAULT_SETTINGS };
 
 document.addEventListener("DOMContentLoaded", loadState);
-document.getElementById("add-email").addEventListener("click", () => {
+addEmail.addEventListener("click", () => {
   currentProfile.emails = [...(currentProfile.emails || []), ""];
   renderEmails();
 });
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  status.textContent = "";
+  statusMessage.textContent = "";
   errors.textContent = "";
 
   const profile = readProfile();
@@ -28,10 +29,10 @@ form.addEventListener("submit", async (event) => {
   await chrome.storage.local.set({ profile, settings });
   currentProfile = profile;
   currentSettings = settings;
-  status.textContent = "Saved.";
+  statusMessage.textContent = "Saved.";
 });
 
-async function loadState() {
+async function loadState(): Promise<void> {
   const stored = await chrome.storage.local.get({
     profile: DEFAULT_PROFILE,
     settings: DEFAULT_SETTINGS
@@ -39,16 +40,16 @@ async function loadState() {
   currentProfile = { ...DEFAULT_PROFILE, ...stored.profile };
   currentSettings = { ...DEFAULT_SETTINGS, ...stored.settings };
 
-  for (const key of ["name", "date", "adminNumber", "class"]) {
-    document.getElementById(key).value = currentProfile[key] || "";
+  for (const key of ["name", "date", "adminNumber", "class"] as const) {
+    getInput(key).value = currentProfile[key] || "";
   }
-  for (const key of ["localModelBaseUrl", "modelName", "autofillThreshold", "suggestThreshold"]) {
-    document.getElementById(key).value = currentSettings[key] ?? "";
+  for (const key of ["localModelBaseUrl", "modelName", "autofillThreshold", "suggestThreshold"] as const) {
+    getInput(key).value = String(currentSettings[key] ?? "");
   }
   renderEmails();
 }
 
-function renderEmails() {
+function renderEmails(): void {
   emailsContainer.innerHTML = "";
   const emails = currentProfile.emails?.length ? currentProfile.emails : [""];
   emails.forEach((email, index) => {
@@ -85,31 +86,31 @@ function renderEmails() {
   });
 }
 
-function readProfile() {
+function readProfile(): Profile {
   const emails = Array.from(emailsContainer.querySelectorAll("input"))
     .map((input) => input.value.trim())
     .filter(Boolean);
   return {
-    name: document.getElementById("name").value.trim(),
-    date: document.getElementById("date").value,
-    adminNumber: document.getElementById("adminNumber").value.trim(),
-    class: document.getElementById("class").value.trim(),
+    name: getInput("name").value.trim(),
+    date: getInput("date").value,
+    adminNumber: getInput("adminNumber").value.trim(),
+    class: getInput("class").value.trim(),
     emails,
     activeEmailIndex: Math.max(0, Math.min(currentProfile.activeEmailIndex || 0, Math.max(0, emails.length - 1)))
   };
 }
 
-function readSettings() {
+function readSettings(): Settings {
   return {
-    localModelBaseUrl: document.getElementById("localModelBaseUrl").value.trim() || DEFAULT_SETTINGS.localModelBaseUrl,
-    modelName: document.getElementById("modelName").value.trim() || DEFAULT_SETTINGS.modelName,
-    autofillThreshold: Number(document.getElementById("autofillThreshold").value),
-    suggestThreshold: Number(document.getElementById("suggestThreshold").value)
+    localModelBaseUrl: getInput("localModelBaseUrl").value.trim() || DEFAULT_SETTINGS.localModelBaseUrl,
+    modelName: getInput("modelName").value.trim() || DEFAULT_SETTINGS.modelName,
+    autofillThreshold: Number(getInput("autofillThreshold").value),
+    suggestThreshold: Number(getInput("suggestThreshold").value)
   };
 }
 
-function validate(profile, settings) {
-  const validationErrors = [];
+function validate(profile: Profile, settings: Settings): string[] {
+  const validationErrors: string[] = [];
   if (profile.adminNumber && !/^\d{6}$/.test(profile.adminNumber)) {
     validationErrors.push("Admin number must be exactly 6 digits.");
   }
@@ -131,6 +132,10 @@ function validate(profile, settings) {
   return validationErrors;
 }
 
-function validThreshold(value) {
+function validThreshold(value: number): boolean {
   return Number.isFinite(value) && value >= 0 && value <= 1;
+}
+
+function getInput(id: string): HTMLInputElement {
+  return document.getElementById(id) as HTMLInputElement;
 }

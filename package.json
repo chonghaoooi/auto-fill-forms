@@ -1,0 +1,12 @@
+{
+  "name": "local-ai-form-autofill",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node --test tests/background.test.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

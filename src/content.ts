@@ -1,8 +1,33 @@
+type ContentProfileKey = "name" | "date" | "adminNumber" | "class" | "email" | "none";
+
+type ContentExtractedField = {
+  id: string;
+  type: string;
+  label: string;
+  helper: string;
+  placeholder: string;
+  aria: string;
+  options: string[];
+};
+
+type ContentClassificationResult = {
+  fieldId: string;
+  profileKey: ContentProfileKey;
+  confidence: number;
+};
+
+type ContentState = {
+  fields: ContentExtractedField[];
+  settings: Settings;
+  profile: Profile;
+  touched: WeakSet<Element>;
+};
+
 (async function initAutofill() {
-  const state = {
+  const state: ContentState = {
     fields: [],
-    settings: {},
-    profile: {},
+    settings: { ...DEFAULT_SETTINGS },
+    profile: { ...DEFAULT_PROFILE },
     touched: new WeakSet()
   };
 
@@ -17,15 +42,15 @@
       profile: DEFAULT_PROFILE,
       settings: DEFAULT_SETTINGS
     });
-    state.profile = profile;
-    state.settings = settings;
+    state.profile = { ...DEFAULT_PROFILE, ...profile };
+    state.settings = { ...DEFAULT_SETTINGS, ...settings };
     state.fields = extractFields();
 
     if (state.fields.length === 0) {
       return;
     }
 
-    chrome.runtime.sendMessage({ type: "CLASSIFY_FIELDS", fields: state.fields }, (response) => {
+    chrome.runtime.sendMessage({ type: "CLASSIFY_FIELDS", fields: state.fields }, (response?: { results?: ContentClassificationResult[] }) => {
       if (chrome.runtime.lastError) {
         console.warn("AI Form Autofill message failed", chrome.runtime.lastError);
         return;
@@ -37,7 +62,7 @@
   scanAndClassify();
   new MutationObserver(scanAndClassify).observe(document.body, { childList: true, subtree: true });
 
-  function extractFields() {
+  function extractFields(): ContentExtractedField[] {
     return Array.from(document.querySelectorAll("input, textarea, select"))
       .filter(isFillable)
       .map((control, index) => {
@@ -55,11 +80,11 @@
       });
   }
 
-  function applyClassificationResults(results) {
+  function applyClassificationResults(results: ContentClassificationResult[]): void {
     for (const result of results) {
       const field = state.fields.find((item) => item.id === result.fieldId);
       const control = field && document.querySelector(`[data-ai-autofill-id="${cssEscape(field.id)}"]`);
-      if (!control || result.profileKey === "none" || state.touched.has(control) || hasUserValue(control)) {
+      if (!isFillable(control) || result.profileKey === "none" || state.touched.has(control) || hasUserValue(control)) {
         continue;
       }
       if (control instanceof HTMLInputElement && ["radio", "checkbox"].includes(control.type)) {
@@ -82,7 +107,7 @@
     }
   }
 
-  function valueForProfileKey(key) {
+  function valueForProfileKey(key: Exclude<ContentProfileKey, "none">): string {
     if (key === "email") {
       const emails = Array.isArray(state.profile.emails) ? state.profile.emails : [];
       return emails[state.profile.activeEmailIndex || 0] || emails.find(Boolean) || "";
@@ -90,7 +115,7 @@
     return state.profile[key] || "";
   }
 
-  function renderSuggestion(control, key, value) {
+  function renderSuggestion(control: FillableControl, key: Exclude<ContentProfileKey, "none">, value: string): void {
     const bubble = makeBubble(control, "ai-autofill-suggestion");
     bubble.innerHTML = "";
     const button = document.createElement("button");
@@ -106,7 +131,7 @@
     bubble.append(button);
   }
 
-  function renderEmailChooser(control) {
+  function renderEmailChooser(control: FillableControl): void {
     const emails = (state.profile.emails || []).filter(Boolean);
     if (emails.length < 2) {
       return;
@@ -128,25 +153,27 @@
   }
 })();
 
-function isFillable(element) {
+type FillableControl = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+
+function isFillable(element: unknown): element is FillableControl {
   if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement)) {
     return false;
   }
-  if (element.disabled || element.readOnly) {
+  if (element.disabled || (!(element instanceof HTMLSelectElement) && element.readOnly)) {
     return false;
   }
   const type = element instanceof HTMLInputElement ? element.type : element.tagName.toLowerCase();
   return !["hidden", "submit", "button", "reset", "file", "image", "password"].includes(type);
 }
 
-function getFieldType(control) {
+function getFieldType(control: FillableControl): string {
   if (control instanceof HTMLInputElement) {
     return control.type || "text";
   }
   return control.tagName.toLowerCase();
 }
 
-function findLabelText(control) {
+function findLabelText(control: FillableControl): string {
   const explicit = control.id ? document.querySelector(`label[for="${cssEscape(control.id)}"]`) : null;
   const wrapping = control.closest("label");
   const formBlock = control.closest("[role='listitem'], [data-automation-id='questionItem'], .freebirdFormviewerViewItemsItemItem, div");
@@ -158,7 +185,7 @@ function findLabelText(control) {
   ].filter(Boolean).join(" ");
 }
 
-function findHelperText(control) {
+function findHelperText(control: FillableControl): string {
   const describedBy = textFromIdList(control.getAttribute("aria-describedby"));
   const formBlock = control.closest("[role='listitem'], [data-automation-id='questionItem'], .freebirdFormviewerViewItemsItemItem, div");
   return [
@@ -167,7 +194,7 @@ function findHelperText(control) {
   ].filter(Boolean).join(" ");
 }
 
-function getAriaText(control) {
+function getAriaText(control: FillableControl): string {
   return [
     control.getAttribute("aria-label"),
     textFromIdList(control.getAttribute("aria-labelledby")),
@@ -175,7 +202,7 @@ function getAriaText(control) {
   ].filter(Boolean).join(" ");
 }
 
-function textFromIdList(value) {
+function textFromIdList(value: string | null): string {
   return String(value || "")
     .split(/\s+/)
     .map((id) => document.getElementById(id)?.textContent || "")
@@ -183,7 +210,7 @@ function textFromIdList(value) {
     .join(" ");
 }
 
-function getOptionLabels(control) {
+function getOptionLabels(control: FillableControl): string[] {
   if (control instanceof HTMLSelectElement) {
     return Array.from(control.options).map((option) => option.textContent || option.value);
   }
@@ -191,7 +218,7 @@ function getOptionLabels(control) {
   return group ? Array.from(group.querySelectorAll("label, [role='radio'], [role='checkbox']")).map((item) => item.textContent || "") : [];
 }
 
-function nearestTextBefore(control) {
+function nearestTextBefore(control: FillableControl): string {
   let node = control.previousElementSibling;
   while (node) {
     const text = normalizeText(node.textContent || "");
@@ -203,7 +230,7 @@ function nearestTextBefore(control) {
   return "";
 }
 
-function normalizeText(value) {
+function normalizeText(value: string): string {
   return String(value || "")
     .normalize("NFKC")
     .replace(/\s+/g, " ")
@@ -212,14 +239,14 @@ function normalizeText(value) {
     .toLocaleLowerCase();
 }
 
-function hasUserValue(control) {
+function hasUserValue(control: FillableControl): boolean {
   if (control instanceof HTMLSelectElement) {
     return Boolean(control.value);
   }
   return Boolean(control.value && String(control.value).trim());
 }
 
-function setNativeValue(control, value) {
+function setNativeValue(control: FillableControl, value: string): void {
   const prototype = Object.getPrototypeOf(control);
   const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
   if (descriptor?.set) {
@@ -231,8 +258,8 @@ function setNativeValue(control, value) {
   control.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
-function makeBubble(control, className) {
-  const existing = control.parentElement?.querySelector(`.${className}`);
+function makeBubble(control: FillableControl, className: string): HTMLDivElement {
+  const existing = control.parentElement?.querySelector<HTMLDivElement>(`.${className}`);
   if (existing) {
     return existing;
   }
@@ -243,7 +270,7 @@ function makeBubble(control, className) {
   return bubble;
 }
 
-function labelForKey(key) {
+function labelForKey(key: Exclude<ContentProfileKey, "none">): string {
   return {
     name: "name",
     date: "date",
@@ -253,17 +280,17 @@ function labelForKey(key) {
   }[key] || key;
 }
 
-function cssEscape(value) {
-  if (window.CSS?.escape) {
+function cssEscape(value: string): string {
+  if (typeof CSS !== "undefined" && CSS.escape) {
     return CSS.escape(value);
   }
   return String(value).replace(/["\\]/g, "\\$&");
 }
 
-function debounce(fn, delay) {
-  let timer;
-  return (...args) => {
+function debounce<T extends (...args: any[]) => void>(fn: T, delay: number): T {
+  let timer: number | undefined;
+  return ((...args: Parameters<T>) => {
     clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
-  };
+    timer = window.setTimeout(() => fn(...args), delay);
+  }) as T;
 }

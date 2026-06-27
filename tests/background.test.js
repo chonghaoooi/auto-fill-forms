@@ -6,8 +6,10 @@ const {
   normalizeProfileKey,
   clampConfidence,
   fallbackClassify,
-  buildPrompt
-} = require("../src/background.js");
+  buildPrompt,
+  warmModel,
+  unloadModel
+} = require("../dist/background.js");
 
 test("parseModelJson extracts JSON from model text", () => {
   assert.deepEqual(parseModelJson('{"profileKey":"email","confidence":0.93}'), {
@@ -47,4 +49,32 @@ test("prompt constrains model to classifier JSON", () => {
   assert.match(prompt, /Allowed keys/);
   assert.match(prompt, /Return only JSON/);
   assert.match(prompt, /Name per SAS/);
+});
+
+test("model lifecycle warms then unloads Ollama model", async () => {
+  const calls = [];
+  const originalFetch = global.fetch;
+  global.fetch = async (_url, options) => {
+    calls.push(JSON.parse(options.body));
+    return {
+      ok: true,
+      json: async () => ({ response: "{}" })
+    };
+  };
+
+  try {
+    const settings = {
+      localModelBaseUrl: "http://localhost:11434",
+      modelName: "smollm3:3b",
+      autofillThreshold: 0.9,
+      suggestThreshold: 0.6
+    };
+    await warmModel(settings);
+    await unloadModel(settings);
+  } finally {
+    global.fetch = originalFetch;
+  }
+
+  assert.equal(calls[0].keep_alive, "30s");
+  assert.equal(calls[1].keep_alive, 0);
 });
