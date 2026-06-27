@@ -2,72 +2,42 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 
 const {
-  parseModelJson,
-  normalizeProfileKey,
-  fallbackClassify,
-  buildPrompt,
-  warmModel,
-  unloadModel
+  classifyField,
+  classifyFields,
+  normalizeFieldText,
+  normalizeProfileKey
 } = require("../dist/background.js");
-
-test("parseModelJson extracts JSON from model text", () => {
-  assert.deepEqual(parseModelJson('{"profileKey":"email"}'), {
-    profileKey: "email"
-  });
-  assert.deepEqual(parseModelJson('Here: {"profileKey":"name"}'), {
-    profileKey: "name"
-  });
-});
 
 test("profile keys are normalized", () => {
   assert.equal(normalizeProfileKey("email"), "email");
+  assert.equal(normalizeProfileKey("phoneNumber"), "phoneNumber");
   assert.equal(normalizeProfileKey("phone"), "none");
 });
 
-test("fallback classifier covers common school form labels", () => {
-  const results = fallbackClassify([
+test("local classifier covers common school form labels", () => {
+  const results = classifyFields([
     { id: "1", label: "Admin no" },
     { id: "2", label: "What's ur name" },
     { id: "3", label: "School email address", type: "email" },
-    { id: "4", label: "Class group" }
+    { id: "4", label: "Class group" },
+    { id: "5", label: "Mobile phone number", type: "tel" }
   ]);
 
   assert.equal(results[0].profileKey, "adminNumber");
   assert.equal(results[1].profileKey, "name");
   assert.equal(results[2].profileKey, "email");
   assert.equal(results[3].profileKey, "class");
+  assert.equal(results[4].profileKey, "phoneNumber");
 });
 
-test("prompt constrains model to classifier JSON", () => {
-  const prompt = buildPrompt({ label: "Name per SAS", type: "text" });
-  assert.match(prompt, /Allowed keys/);
-  assert.match(prompt, /Return only JSON/);
-  assert.match(prompt, /Name per SAS/);
-  assert.doesNotMatch(prompt, /\bdate\b/);
+test("phone detection handles contact wording", () => {
+  assert.equal(classifyField({ id: "1", label: "Contact no." }), "phoneNumber");
+  assert.equal(classifyField({ id: "2", label: "Telephone" }), "phoneNumber");
 });
 
-test("model lifecycle warms then unloads Ollama model", async () => {
-  const calls = [];
-  const originalFetch = global.fetch;
-  global.fetch = async (_url, options) => {
-    calls.push(JSON.parse(options.body));
-    return {
-      ok: true,
-      json: async () => ({ response: "{}" })
-    };
-  };
-
-  try {
-    const settings = {
-      localModelBaseUrl: "http://localhost:11434",
-      modelName: "qwen2.5:0.5b",
-    };
-    await warmModel(settings);
-    await unloadModel(settings);
-  } finally {
-    global.fetch = originalFetch;
-  }
-
-  assert.equal(calls[0].keep_alive, "30s");
-  assert.equal(calls[1].keep_alive, 0);
+test("field text is normalized from all context", () => {
+  assert.equal(
+    normalizeFieldText({ id: "1", label: " PHONE ", helper: "Number", placeholder: " Optional " }),
+    "phone number optional"
+  );
 });

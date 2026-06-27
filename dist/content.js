@@ -28,7 +28,7 @@
         }
         chrome.runtime.sendMessage({ type: "CLASSIFY_FIELDS", fields: state.fields }, (response) => {
             if (chrome.runtime.lastError) {
-                console.warn("AI Form Autofill message failed", chrome.runtime.lastError);
+                console.warn("Form Autofill message failed", chrome.runtime.lastError);
                 return;
             }
             if (!state.settings.enabled) {

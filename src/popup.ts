@@ -48,11 +48,8 @@ async function loadState(): Promise<void> {
   currentProfile = { ...DEFAULT_PROFILE, ...stored.profile };
   currentSettings = { ...DEFAULT_SETTINGS, ...stored.settings };
 
-  for (const key of ["name", "adminNumber", "class"] as const) {
+  for (const key of ["name", "adminNumber", "phoneNumber", "class"] as const) {
     getInput(key).value = currentProfile[key] || "";
-  }
-  for (const key of ["localModelBaseUrl", "modelName"] as const) {
-    getInput(key).value = String(currentSettings[key] ?? "");
   }
   enabledToggle.checked = currentSettings.enabled;
   enabledText.textContent = currentSettings.enabled ? "On" : "Off";
@@ -103,6 +100,7 @@ function readProfile(): Profile {
   return {
     name: getInput("name").value.trim(),
     adminNumber: getInput("adminNumber").value.trim(),
+    phoneNumber: getInput("phoneNumber").value.trim(),
     class: getInput("class").value.trim(),
     emails,
     activeEmailIndex: Math.max(0, Math.min(currentProfile.activeEmailIndex || 0, Math.max(0, emails.length - 1)))
@@ -111,9 +109,7 @@ function readProfile(): Profile {
 
 function readSettings(): Settings {
   return {
-    enabled: enabledToggle.checked,
-    localModelBaseUrl: getInput("localModelBaseUrl").value.trim() || DEFAULT_SETTINGS.localModelBaseUrl,
-    modelName: getInput("modelName").value.trim() || DEFAULT_SETTINGS.modelName
+    enabled: enabledToggle.checked
   };
 }
 

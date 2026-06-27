@@ -1,4 +1,4 @@
-type ContentProfileKey = "name" | "adminNumber" | "class" | "email" | "none";
+type ContentProfileKey = "name" | "adminNumber" | "phoneNumber" | "class" | "email" | "none";
 
 type ContentExtractedField = {
   id: string;
@@ -55,7 +55,7 @@ type ContentState = {
 
     chrome.runtime.sendMessage({ type: "CLASSIFY_FIELDS", fields: state.fields }, (response?: { results?: ContentClassificationResult[] }) => {
       if (chrome.runtime.lastError) {
-        console.warn("AI Form Autofill message failed", chrome.runtime.lastError);
+        console.warn("Form Autofill message failed", chrome.runtime.lastError);
         return;
       }
       if (!state.settings.enabled) {

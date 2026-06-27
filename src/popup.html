@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AI Form Autofill</title>
+    <title>Form Autofill</title>
     <link rel="stylesheet" href="popup.css">
   </head>
   <body>
     <main>
       <header class="hero">
         <div>
-          <p class="eyebrow">Local AI assistant</p>
+          <p class="eyebrow">Local form helper</p>
           <h1>Form Autofill</h1>
         </div>
         <span class="status-pill">Private</span>
@@ -41,6 +41,10 @@
             <input id="adminNumber" name="adminNumber" placeholder="Any length or format">
           </label>
           <label>
+            Phone number
+            <input id="phoneNumber" name="phoneNumber" autocomplete="tel" placeholder="+65 9123 4567">
+          </label>
+          <label>
             Class
             <input id="class" name="class" placeholder="ETC.DIT/FT/2A/05">
           </label>
@@ -52,20 +56,6 @@
           </div>
           <div id="emails"></div>
           <button id="add-email" type="button">Add email</button>
-        </section>
-        <section class="panel">
-          <div>
-            <div class="section-title">Local AI model</div>
-            <p class="help-text">Runs on your computer through Ollama. No form text is sent to a cloud service.</p>
-          </div>
-          <label>
-            Ollama address
-            <input id="localModelBaseUrl" name="localModelBaseUrl" placeholder="http://localhost:11434">
-          </label>
-          <label>
-            Model name
-            <input id="modelName" name="modelName" placeholder="qwen2.5:0.5b">
-          </label>
         </section>
         <p id="errors" role="alert"></p>
         <button class="save-button" type="submit">Save profile</button>
