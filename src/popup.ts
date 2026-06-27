@@ -8,11 +8,13 @@ const enabledText = document.getElementById("enabledText") as HTMLSpanElement;
 
 let currentProfile: Profile = { ...DEFAULT_PROFILE };
 let currentSettings: Settings = { ...DEFAULT_SETTINGS };
+const autosaveProfile = debouncePopup(() => saveProfile("Saved."), 350);
 
 document.addEventListener("DOMContentLoaded", loadState);
 addEmail.addEventListener("click", () => {
   currentProfile.emails = [...(currentProfile.emails || []), ""];
   renderEmails();
+  autosaveProfile();
 });
 enabledToggle.addEventListener("change", async () => {
   enabledText.textContent = enabledToggle.checked ? "On" : "Off";
@@ -26,18 +28,7 @@ form.addEventListener("submit", async (event) => {
   statusMessage.textContent = "";
   errors.textContent = "";
 
-  const profile = readProfile();
-  const settings = readSettings();
-  const validationErrors = validate(profile, settings);
-  if (validationErrors.length) {
-    errors.textContent = validationErrors.join(" ");
-    return;
-  }
-
-  await chrome.storage.local.set({ profile, settings });
-  currentProfile = profile;
-  currentSettings = settings;
-  statusMessage.textContent = "Saved.";
+  await saveProfile("Saved.");
 });
 
 async function loadState(): Promise<void> {
@@ -49,7 +40,9 @@ async function loadState(): Promise<void> {
   currentSettings = { ...DEFAULT_SETTINGS, ...stored.settings };
 
   for (const key of ["name", "adminNumber", "phoneNumber", "class"] as const) {
-    getInput(key).value = currentProfile[key] || "";
+    const input = getInput(key);
+    input.value = currentProfile[key] || "";
+    input.addEventListener("input", autosaveProfile);
   }
   enabledToggle.checked = currentSettings.enabled;
   enabledText.textContent = currentSettings.enabled ? "On" : "Off";
@@ -69,6 +62,7 @@ function renderEmails(): void {
     input.placeholder = "email@example.com";
     input.addEventListener("input", () => {
       currentProfile.emails[index] = input.value;
+      autosaveProfile();
     });
 
     const active = document.createElement("button");
@@ -77,6 +71,7 @@ function renderEmails(): void {
     active.addEventListener("click", () => {
       currentProfile.activeEmailIndex = index;
       renderEmails();
+      autosaveProfile();
     });
 
     const remove = document.createElement("button");
@@ -86,6 +81,7 @@ function renderEmails(): void {
       currentProfile.emails.splice(index, 1);
       currentProfile.activeEmailIndex = Math.max(0, Math.min(currentProfile.activeEmailIndex || 0, currentProfile.emails.length - 1));
       renderEmails();
+      autosaveProfile();
     });
 
     row.append(input, active, remove);
@@ -129,4 +125,30 @@ function validate(profile: Profile, settings: Settings): string[] {
 
 function getInput(id: string): HTMLInputElement {
   return document.getElementById(id) as HTMLInputElement;
+}
+
+async function saveProfile(successMessage: string): Promise<void> {
+  statusMessage.textContent = "";
+  errors.textContent = "";
+
+  const profile = readProfile();
+  const settings = readSettings();
+  const validationErrors = validate(profile, settings);
+  if (validationErrors.length) {
+    errors.textContent = validationErrors.join(" ");
+    return;
+  }
+
+  await chrome.storage.local.set({ profile, settings });
+  currentProfile = profile;
+  currentSettings = settings;
+  statusMessage.textContent = successMessage;
+}
+
+function debouncePopup<T extends (...args: any[]) => void>(fn: T, delay: number): T {
+  let timer: number | undefined;
+  return ((...args: Parameters<T>) => {
+    clearTimeout(timer);
+    timer = window.setTimeout(() => fn(...args), delay);
+  }) as T;
 }
