@@ -40,7 +40,7 @@ async function loadState(): Promise<void> {
   currentProfile = { ...DEFAULT_PROFILE, ...stored.profile };
   currentSettings = { ...DEFAULT_SETTINGS, ...stored.settings };
 
-  for (const key of ["name", "date", "adminNumber", "class"] as const) {
+  for (const key of ["name", "adminNumber", "class"] as const) {
     getInput(key).value = currentProfile[key] || "";
   }
   for (const key of ["localModelBaseUrl", "modelName", "autofillThreshold", "suggestThreshold"] as const) {
@@ -92,7 +92,6 @@ function readProfile(): Profile {
     .filter(Boolean);
   return {
     name: getInput("name").value.trim(),
-    date: getInput("date").value,
     adminNumber: getInput("adminNumber").value.trim(),
     class: getInput("class").value.trim(),
     emails,

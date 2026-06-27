@@ -1,4 +1,4 @@
-type ContentProfileKey = "name" | "date" | "adminNumber" | "class" | "email" | "none";
+type ContentProfileKey = "name" | "adminNumber" | "class" | "email" | "none";
 
 type ContentExtractedField = {
   id: string;
@@ -273,7 +273,6 @@ function makeBubble(control: FillableControl, className: string): HTMLDivElement
 function labelForKey(key: Exclude<ContentProfileKey, "none">): string {
   return {
     name: "name",
-    date: "date",
     adminNumber: "admin number",
     class: "class",
     email: "email"

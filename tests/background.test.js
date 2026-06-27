@@ -49,6 +49,7 @@ test("prompt constrains model to classifier JSON", () => {
   assert.match(prompt, /Allowed keys/);
   assert.match(prompt, /Return only JSON/);
   assert.match(prompt, /Name per SAS/);
+  assert.doesNotMatch(prompt, /\bdate\b/);
 });
 
 test("model lifecycle warms then unloads Ollama model", async () => {

@@ -223,7 +223,6 @@ function makeBubble(control, className) {
 function labelForKey(key) {
     return {
         name: "name",
-        date: "date",
         adminNumber: "admin number",
         class: "class",
         email: "email"

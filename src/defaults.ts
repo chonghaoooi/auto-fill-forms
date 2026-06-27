@@ -1,6 +1,5 @@
 type Profile = {
   name: string;
-  date: string;
   adminNumber: string;
   class: string;
   emails: string[];
@@ -16,7 +15,6 @@ type Settings = {
 
 const DEFAULT_PROFILE: Profile = {
   name: "",
-  date: "",
   adminNumber: "",
   class: "",
   emails: [""],
@@ -30,7 +28,7 @@ const DEFAULT_SETTINGS: Settings = {
   modelName: "qwen2.5:0.5b"
 };
 
-const PROFILE_KEYS = ["name", "date", "adminNumber", "class", "email", "none"] as const;
+const PROFILE_KEYS = ["name", "adminNumber", "class", "email", "none"] as const;
 
 if (typeof module !== "undefined") {
   module.exports = { DEFAULT_PROFILE, DEFAULT_SETTINGS, PROFILE_KEYS };

@@ -34,7 +34,7 @@ async function loadState() {
     });
     currentProfile = { ...DEFAULT_PROFILE, ...stored.profile };
     currentSettings = { ...DEFAULT_SETTINGS, ...stored.settings };
-    for (const key of ["name", "date", "adminNumber", "class"]) {
+    for (const key of ["name", "adminNumber", "class"]) {
         getInput(key).value = currentProfile[key] || "";
     }
     for (const key of ["localModelBaseUrl", "modelName", "autofillThreshold", "suggestThreshold"]) {
@@ -80,7 +80,6 @@ function readProfile() {
         .filter(Boolean);
     return {
         name: getInput("name").value.trim(),
-        date: getInput("date").value,
         adminNumber: getInput("adminNumber").value.trim(),
         class: getInput("class").value.trim(),
         emails,

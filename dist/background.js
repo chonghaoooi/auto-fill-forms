@@ -144,10 +144,6 @@ function fallbackClassify(fields) {
             profileKey = "class";
             confidence = 0.68;
         }
-        else if (/\bdate\b|\bdob\b|birth/.test(text) || type === "date") {
-            profileKey = "date";
-            confidence = 0.7;
-        }
         else if (/\bname\b|名字|姓名/.test(text)) {
             profileKey = "name";
             confidence = 0.7;

@@ -1,4 +1,4 @@
-type BackgroundProfileKey = "name" | "date" | "adminNumber" | "class" | "email" | "none";
+type BackgroundProfileKey = "name" | "adminNumber" | "class" | "email" | "none";
 
 type BackgroundExtractedField = {
   id: string;
@@ -182,9 +182,6 @@ function fallbackClassify(fields: BackgroundExtractedField[]): BackgroundClassif
     } else if (/\bclass\b|\bgroup\b|\bform\b|\bcohort\b/.test(text)) {
       profileKey = "class";
       confidence = 0.68;
-    } else if (/\bdate\b|\bdob\b|birth/.test(text) || type === "date") {
-      profileKey = "date";
-      confidence = 0.7;
     } else if (/\bname\b|名字|姓名/.test(text)) {
       profileKey = "name";
       confidence = 0.7;
