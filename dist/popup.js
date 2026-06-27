@@ -13,8 +13,11 @@ addEmail.addEventListener("click", () => {
     currentProfile.emails = [...(currentProfile.emails || []), ""];
     renderEmails();
 });
-enabledToggle.addEventListener("change", () => {
+enabledToggle.addEventListener("change", async () => {
     enabledText.textContent = enabledToggle.checked ? "On" : "Off";
+    currentSettings = { ...currentSettings, enabled: enabledToggle.checked };
+    await chrome.storage.local.set({ settings: currentSettings });
+    statusMessage.textContent = enabledToggle.checked ? "Autofill is on." : "Autofill is off.";
 });
 form.addEventListener("submit", async (event) => {
     event.preventDefault();

@@ -31,6 +31,10 @@
                 console.warn("AI Form Autofill message failed", chrome.runtime.lastError);
                 return;
             }
+            if (!state.settings.enabled) {
+                removeInlineAutofillUi();
+                return;
+            }
             applyClassificationResults(response?.results || []);
         });
     }, 350);
