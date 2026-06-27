@@ -18,6 +18,10 @@
         });
         state.profile = { ...DEFAULT_PROFILE, ...profile };
         state.settings = { ...DEFAULT_SETTINGS, ...settings };
+        if (!state.settings.enabled) {
+            removeInlineAutofillUi();
+            return;
+        }
         state.fields = extractFields();
         if (state.fields.length === 0) {
             return;
@@ -32,6 +36,17 @@
     }, 350);
     scanAndClassify();
     new MutationObserver(scanAndClassify).observe(document.body, { childList: true, subtree: true });
+    chrome.storage.onChanged?.addListener((changes, areaName) => {
+        if (areaName === "local" && changes.settings) {
+            state.settings = { ...DEFAULT_SETTINGS, ...changes.settings.newValue };
+            if (!state.settings.enabled) {
+                removeInlineAutofillUi();
+            }
+            else {
+                scanAndClassify();
+            }
+        }
+    });
     function extractFields() {
         return Array.from(document.querySelectorAll("input, textarea, select"))
             .filter(isFillable)
@@ -276,6 +291,9 @@ function ensureAutofillStyles() {
     }
   `;
     document.head.append(style);
+}
+function removeInlineAutofillUi() {
+    document.querySelectorAll(".ai-autofill-email-picker").forEach((node) => node.remove());
 }
 function debounce(fn, delay) {
     let timer;

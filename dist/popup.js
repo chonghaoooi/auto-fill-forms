@@ -4,12 +4,17 @@ const emailsContainer = document.getElementById("emails");
 const errors = document.getElementById("errors");
 const statusMessage = document.getElementById("status");
 const addEmail = document.getElementById("add-email");
+const enabledToggle = document.getElementById("enabled");
+const enabledText = document.getElementById("enabledText");
 let currentProfile = { ...DEFAULT_PROFILE };
 let currentSettings = { ...DEFAULT_SETTINGS };
 document.addEventListener("DOMContentLoaded", loadState);
 addEmail.addEventListener("click", () => {
     currentProfile.emails = [...(currentProfile.emails || []), ""];
     renderEmails();
+});
+enabledToggle.addEventListener("change", () => {
+    enabledText.textContent = enabledToggle.checked ? "On" : "Off";
 });
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -40,6 +45,8 @@ async function loadState() {
     for (const key of ["localModelBaseUrl", "modelName"]) {
         getInput(key).value = String(currentSettings[key] ?? "");
     }
+    enabledToggle.checked = currentSettings.enabled;
+    enabledText.textContent = currentSettings.enabled ? "On" : "Off";
     renderEmails();
 }
 function renderEmails() {
@@ -88,6 +95,7 @@ function readProfile() {
 }
 function readSettings() {
     return {
+        enabled: enabledToggle.checked,
         localModelBaseUrl: getInput("localModelBaseUrl").value.trim() || DEFAULT_SETTINGS.localModelBaseUrl,
         modelName: getInput("modelName").value.trim() || DEFAULT_SETTINGS.modelName
     };

@@ -3,6 +3,8 @@ const emailsContainer = document.getElementById("emails") as HTMLDivElement;
 const errors = document.getElementById("errors") as HTMLParagraphElement;
 const statusMessage = document.getElementById("status") as HTMLParagraphElement;
 const addEmail = document.getElementById("add-email") as HTMLButtonElement;
+const enabledToggle = document.getElementById("enabled") as HTMLInputElement;
+const enabledText = document.getElementById("enabledText") as HTMLSpanElement;
 
 let currentProfile: Profile = { ...DEFAULT_PROFILE };
 let currentSettings: Settings = { ...DEFAULT_SETTINGS };
@@ -11,6 +13,9 @@ document.addEventListener("DOMContentLoaded", loadState);
 addEmail.addEventListener("click", () => {
   currentProfile.emails = [...(currentProfile.emails || []), ""];
   renderEmails();
+});
+enabledToggle.addEventListener("change", () => {
+  enabledText.textContent = enabledToggle.checked ? "On" : "Off";
 });
 
 form.addEventListener("submit", async (event) => {
@@ -46,6 +51,8 @@ async function loadState(): Promise<void> {
   for (const key of ["localModelBaseUrl", "modelName"] as const) {
     getInput(key).value = String(currentSettings[key] ?? "");
   }
+  enabledToggle.checked = currentSettings.enabled;
+  enabledText.textContent = currentSettings.enabled ? "On" : "Off";
   renderEmails();
 }
 
@@ -101,6 +108,7 @@ function readProfile(): Profile {
 
 function readSettings(): Settings {
   return {
+    enabled: enabledToggle.checked,
     localModelBaseUrl: getInput("localModelBaseUrl").value.trim() || DEFAULT_SETTINGS.localModelBaseUrl,
     modelName: getInput("modelName").value.trim() || DEFAULT_SETTINGS.modelName
   };

@@ -43,6 +43,10 @@ type ContentState = {
     });
     state.profile = { ...DEFAULT_PROFILE, ...profile };
     state.settings = { ...DEFAULT_SETTINGS, ...settings };
+    if (!state.settings.enabled) {
+      removeInlineAutofillUi();
+      return;
+    }
     state.fields = extractFields();
 
     if (state.fields.length === 0) {
@@ -60,6 +64,16 @@ type ContentState = {
 
   scanAndClassify();
   new MutationObserver(scanAndClassify).observe(document.body, { childList: true, subtree: true });
+  chrome.storage.onChanged?.addListener((changes: Record<string, { newValue?: Settings }>, areaName: string) => {
+    if (areaName === "local" && changes.settings) {
+      state.settings = { ...DEFAULT_SETTINGS, ...changes.settings.newValue };
+      if (!state.settings.enabled) {
+        removeInlineAutofillUi();
+      } else {
+        scanAndClassify();
+      }
+    }
+  });
 
   function extractFields(): ContentExtractedField[] {
     return Array.from(document.querySelectorAll("input, textarea, select"))
@@ -326,6 +340,10 @@ function ensureAutofillStyles(): void {
     }
   `;
   document.head.append(style);
+}
+
+function removeInlineAutofillUi(): void {
+  document.querySelectorAll(".ai-autofill-email-picker").forEach((node) => node.remove());
 }
 
 function debounce<T extends (...args: any[]) => void>(fn: T, delay: number): T {

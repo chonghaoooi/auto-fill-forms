@@ -7,6 +7,7 @@ const DEFAULT_PROFILE = {
     activeEmailIndex: 0
 };
 const DEFAULT_SETTINGS = {
+    enabled: true,
     localModelBaseUrl: "http://localhost:11434",
     modelName: "qwen2.5:0.5b"
 };

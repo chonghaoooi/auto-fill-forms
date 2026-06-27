@@ -7,6 +7,7 @@ type Profile = {
 };
 
 type Settings = {
+  enabled: boolean;
   localModelBaseUrl: string;
   modelName: string;
 };
@@ -20,6 +21,7 @@ const DEFAULT_PROFILE: Profile = {
 };
 
 const DEFAULT_SETTINGS: Settings = {
+  enabled: true,
   localModelBaseUrl: "http://localhost:11434",
   modelName: "qwen2.5:0.5b"
 };
