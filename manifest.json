@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Local AI Form Autofill",
+  "description": "Autofill Google Forms and Microsoft Forms from a local profile using local AI classification.",
+  "version": "0.1.0",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://docs.google.com/forms/*",
+    "https://forms.office.com/*",
+    "http://localhost:*/",
+    "http://127.0.0.1:*/"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_title": "AI Form Autofill"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://docs.google.com/forms/*",
+        "https://forms.office.com/*"
+      ],
+      "js": ["src/defaults.js", "src/content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
