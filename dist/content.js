@@ -253,19 +253,19 @@ function ensureAutofillStyles() {
       width: min(100%, 420px);
       margin: 12px 0 0;
       clear: both;
-      border: 1px solid #d6e2f0;
+      border: 1px solid #2a2a2a;
       border-radius: 10px;
       padding: 10px;
-      background: #ffffff;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-      color: #17202a;
+      background: #050505;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+      color: #f5f5f5;
       font: 13px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       z-index: 2147483647;
     }
 
     .ai-autofill-picker-title {
       margin-bottom: 8px;
-      color: #526173;
+      color: #a3a3a3;
       font-size: 12px;
       font-weight: 700;
     }
@@ -277,11 +277,11 @@ function ensureAutofillStyles() {
 
     .ai-autofill-picker-list button {
       width: 100%;
-      border: 1px solid #d8e2ef;
+      border: 1px solid #303030;
       border-radius: 8px;
       padding: 8px 10px;
-      color: #1f2937;
-      background: #f8fbff;
+      color: #f5f5f5;
+      background: #111111;
       font: inherit;
       text-align: left;
       cursor: pointer;
@@ -289,9 +289,9 @@ function ensureAutofillStyles() {
 
     .ai-autofill-picker-list button:hover,
     .ai-autofill-picker-list button.is-active {
-      border-color: #2f6fe4;
-      background: #edf4ff;
-      color: #174ea6;
+      border-color: #f5f5f5;
+      background: #1f1f1f;
+      color: #ffffff;
     }
   `;
     document.head.append(style);

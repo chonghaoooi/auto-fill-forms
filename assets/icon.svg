@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>Form Autofill icon</title>
+  <rect width="128" height="128" rx="28" fill="#050505"/>
+  <rect x="34" y="26" width="60" height="76" rx="10" fill="none" stroke="#ffffff" stroke-width="8"/>
+  <path d="M48 48h32M48 64h32M48 80h16" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+  <path d="M74 78l10 10 18-24" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

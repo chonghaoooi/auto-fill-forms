@@ -2,7 +2,13 @@
   "manifest_version": 3,
   "name": "Local Form Autofill",
   "description": "Autofill Google Forms and Microsoft Forms from a local profile.",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "icons": {
+    "16": "assets/icon-16.png",
+    "32": "assets/icon-32.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  },
   "permissions": ["storage"],
   "host_permissions": [
     "https://docs.google.com/forms/*",
@@ -12,6 +18,12 @@
     "service_worker": "dist/background.js"
   },
   "action": {
+    "default_icon": {
+      "16": "assets/icon-16.png",
+      "32": "assets/icon-32.png",
+      "48": "assets/icon-48.png",
+      "128": "assets/icon-128.png"
+    },
     "default_popup": "src/popup.html",
     "default_title": "Form Autofill"
   },
