@@ -200,13 +200,19 @@ function setNativeValue(control, value) {
 }
 function makeBubble(control, className) {
     ensureAutofillStyles();
-    const existing = control.parentElement?.querySelector(`.${className}`);
+    const host = control.closest("[role='listitem'], [data-automation-id='questionItem'], .freebirdFormviewerViewItemsItemItem") || control.parentElement;
+    const existing = host?.querySelector(`.${className}`);
     if (existing) {
         return existing;
     }
     const bubble = document.createElement("div");
     bubble.className = className;
-    control.insertAdjacentElement("afterend", bubble);
+    if (host && host !== control.parentElement) {
+        host.append(bubble);
+    }
+    else {
+        control.insertAdjacentElement("afterend", bubble);
+    }
     return bubble;
 }
 function cssEscape(value) {
@@ -224,8 +230,10 @@ function ensureAutofillStyles() {
     style.textContent = `
     .ai-autofill-email-picker {
       box-sizing: border-box;
-      max-width: 420px;
-      margin-top: 8px;
+      display: block;
+      width: min(100%, 420px);
+      margin: 12px 0 0;
+      clear: both;
       border: 1px solid #d6e2f0;
       border-radius: 10px;
       padding: 10px;
