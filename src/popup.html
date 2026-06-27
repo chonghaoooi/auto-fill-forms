@@ -41,14 +41,18 @@
             Model name
             <input id="modelName" name="modelName" placeholder="qwen2.5:0.5b">
           </label>
+          <div class="section-title">How careful should autofill be?</div>
+          <p class="help-text">Higher numbers mean the extension waits until the AI is more sure. The defaults are recommended.</p>
           <div class="thresholds">
             <label>
-              Autofill
+              Fill automatically
               <input id="autofillThreshold" name="autofillThreshold" type="number" min="0" max="1" step="0.05">
+              <span class="field-help">Only fills when very sure.</span>
             </label>
             <label>
-              Suggest
+              Ask before filling
               <input id="suggestThreshold" name="suggestThreshold" type="number" min="0" max="1" step="0.05">
+              <span class="field-help">Shows a suggestion when somewhat sure.</span>
             </label>
           </div>
         </section>
