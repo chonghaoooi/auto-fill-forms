@@ -3,10 +3,10 @@
 }
 
 body {
-  width: 360px;
+  width: 390px;
   margin: 0;
-  color: #17202a;
-  background: #f7f8fa;
+  color: #111827;
+  background: #f3f6fb;
   font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -14,9 +14,35 @@ main {
   padding: 16px;
 }
 
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
 h1 {
-  margin: 0 0 14px;
-  font-size: 18px;
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.eyebrow {
+  margin: 0 0 2px;
+  color: #42607d;
+  font-size: 12px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.status-pill {
+  border: 1px solid #b8d7c0;
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: #126b38;
+  background: #e9f8ee;
+  font-size: 12px;
+  font-weight: 750;
 }
 
 form,
@@ -27,7 +53,7 @@ section {
 }
 
 form {
-  gap: 12px;
+  gap: 14px;
 }
 
 label,
@@ -48,30 +74,43 @@ label,
   margin-top: -2px;
 }
 
+.panel {
+  border: 1px solid #dce4ef;
+  border-radius: 8px;
+  padding: 12px;
+  background: #ffffff;
+}
+
 input,
 button,
 select {
   width: 100%;
-  border: 1px solid #c9d1d9;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 8px 10px;
   font: inherit;
 }
 
+input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+  outline: 0;
+}
+
 button {
   border: 0;
   color: white;
-  background: #1459c8;
+  background: #1d5bd8;
   cursor: pointer;
+  font-weight: 700;
 }
 
 button[type="button"] {
-  color: #1459c8;
-  background: #e8f0fe;
+  color: #1d4ed8;
+  background: #edf4ff;
 }
 
-.email-row,
-.thresholds {
+.email-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
@@ -79,7 +118,7 @@ button[type="button"] {
 }
 
 .email-row {
-  grid-template-columns: 1fr 84px 34px;
+  grid-template-columns: 1fr 78px 34px;
 }
 
 .email-row button {
@@ -95,4 +134,19 @@ button[type="button"] {
   min-height: 20px;
   margin: 0;
   color: #287d3c;
+}
+
+.advanced {
+  border-top: 1px solid #e5eaf1;
+  padding-top: 8px;
+}
+
+.advanced summary {
+  cursor: pointer;
+  color: #31506f;
+  font-weight: 700;
+}
+
+.save-button {
+  padding: 10px 12px;
 }

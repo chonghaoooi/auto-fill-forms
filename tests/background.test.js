@@ -4,7 +4,6 @@ const test = require("node:test");
 const {
   parseModelJson,
   normalizeProfileKey,
-  clampConfidence,
   fallbackClassify,
   buildPrompt,
   warmModel,
@@ -12,22 +11,17 @@ const {
 } = require("../dist/background.js");
 
 test("parseModelJson extracts JSON from model text", () => {
-  assert.deepEqual(parseModelJson('{"profileKey":"email","confidence":0.93}'), {
-    profileKey: "email",
-    confidence: 0.93
+  assert.deepEqual(parseModelJson('{"profileKey":"email"}'), {
+    profileKey: "email"
   });
-  assert.deepEqual(parseModelJson('Here: {"profileKey":"name","confidence":1}'), {
-    profileKey: "name",
-    confidence: 1
+  assert.deepEqual(parseModelJson('Here: {"profileKey":"name"}'), {
+    profileKey: "name"
   });
 });
 
-test("profile keys and confidence are normalized", () => {
+test("profile keys are normalized", () => {
   assert.equal(normalizeProfileKey("email"), "email");
   assert.equal(normalizeProfileKey("phone"), "none");
-  assert.equal(clampConfidence(2), 1);
-  assert.equal(clampConfidence(-1), 0);
-  assert.equal(clampConfidence("0.7"), 0.7);
 });
 
 test("fallback classifier covers common school form labels", () => {
@@ -67,8 +61,6 @@ test("model lifecycle warms then unloads Ollama model", async () => {
     const settings = {
       localModelBaseUrl: "http://localhost:11434",
       modelName: "qwen2.5:0.5b",
-      autofillThreshold: 0.9,
-      suggestThreshold: 0.6
     };
     await warmModel(settings);
     await unloadModel(settings);

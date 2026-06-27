@@ -8,52 +8,56 @@
   </head>
   <body>
     <main>
-      <h1>AI Form Autofill</h1>
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Local AI assistant</p>
+          <h1>Form Autofill</h1>
+        </div>
+        <span class="status-pill">Private</span>
+      </header>
       <form id="profile-form" novalidate>
-        <label>
-          Name
-          <input id="name" name="name" autocomplete="name">
-        </label>
-        <label>
-          Admin number
-          <input id="adminNumber" name="adminNumber" inputmode="numeric" pattern="\d{6}" placeholder="123456">
-        </label>
-        <label>
-          Class
-          <input id="class" name="class" placeholder="ETC.DIT/FT/2A/05">
-        </label>
-        <section>
-          <div class="section-title">Emails</div>
+        <section class="panel">
+          <div>
+            <div class="section-title">Your details</div>
+            <p class="help-text">These are filled automatically when a form asks for them.</p>
+          </div>
+          <label>
+            Full name
+            <input id="name" name="name" autocomplete="name" placeholder="Tan Wei Ming">
+          </label>
+          <label>
+            Admin or student ID
+            <input id="adminNumber" name="adminNumber" placeholder="Any length or format">
+          </label>
+          <label>
+            Class
+            <input id="class" name="class" placeholder="ETC.DIT/FT/2A/05">
+          </label>
+        </section>
+        <section class="panel">
+          <div>
+            <div class="section-title">Email choices</div>
+            <p class="help-text">Pick one default. You can switch emails directly on a form.</p>
+          </div>
           <div id="emails"></div>
           <button id="add-email" type="button">Add email</button>
         </section>
-        <section>
-          <div class="section-title">Local model</div>
+        <section class="panel">
+          <div>
+            <div class="section-title">Local AI model</div>
+            <p class="help-text">Runs on your computer through Ollama. No form text is sent to a cloud service.</p>
+          </div>
           <label>
-            Base URL
+            Ollama address
             <input id="localModelBaseUrl" name="localModelBaseUrl" placeholder="http://localhost:11434">
           </label>
           <label>
             Model name
             <input id="modelName" name="modelName" placeholder="qwen2.5:0.5b">
           </label>
-          <div class="section-title">How careful should autofill be?</div>
-          <p class="help-text">Higher numbers mean the extension waits until the AI is more sure. The defaults are recommended.</p>
-          <div class="thresholds">
-            <label>
-              Fill automatically
-              <input id="autofillThreshold" name="autofillThreshold" type="number" min="0" max="1" step="0.05">
-              <span class="field-help">Only fills when very sure.</span>
-            </label>
-            <label>
-              Ask before filling
-              <input id="suggestThreshold" name="suggestThreshold" type="number" min="0" max="1" step="0.05">
-              <span class="field-help">Shows a suggestion when somewhat sure.</span>
-            </label>
-          </div>
         </section>
         <p id="errors" role="alert"></p>
-        <button type="submit">Save</button>
+        <button class="save-button" type="submit">Save profile</button>
         <p id="status" role="status"></p>
       </form>
     </main>

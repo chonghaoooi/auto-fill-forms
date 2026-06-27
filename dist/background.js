@@ -31,8 +31,7 @@ async function classifyFields(fields) {
             const modelResult = await classifyOneField(field, settings);
             results.push({
                 fieldId: field.id,
-                profileKey: normalizeProfileKey(modelResult.profileKey),
-                confidence: clampConfidence(modelResult.confidence)
+                profileKey: normalizeProfileKey(modelResult.profileKey)
             });
         }
         return results;
@@ -43,7 +42,7 @@ async function classifyFields(fields) {
 }
 async function warmModel(settings) {
     await callOllamaGenerate(settings, {
-        prompt: "Return only this JSON: {\"profileKey\":\"none\",\"confidence\":0}",
+        prompt: "Return only this JSON: {\"profileKey\":\"none\"}",
         keep_alive: "30s"
     });
 }
@@ -90,7 +89,7 @@ function buildPrompt(field) {
     return [
         "You classify a browser form field into exactly one saved profile key.",
         `Allowed keys: ${bgProfileKeys.join(", ")}.`,
-        "Return only JSON with profileKey and confidence from 0 to 1.",
+        "Return only JSON with profileKey.",
         "Use none when the field is not asking for one of these details.",
         "",
         JSON.stringify({
@@ -107,48 +106,36 @@ function parseModelJson(text) {
     const trimmed = String(text || "").trim();
     const match = trimmed.match(/\{[\s\S]*\}/);
     if (!match) {
-        return { profileKey: "none", confidence: 0 };
+        return { profileKey: "none" };
     }
     try {
         return JSON.parse(match[0]);
     }
     catch (_) {
-        return { profileKey: "none", confidence: 0 };
+        return { profileKey: "none" };
     }
 }
 function normalizeProfileKey(value) {
     return bgProfileKeys.includes(value) ? value : "none";
-}
-function clampConfidence(value) {
-    const number = Number(value);
-    if (!Number.isFinite(number)) {
-        return 0;
-    }
-    return Math.max(0, Math.min(1, number));
 }
 function fallbackClassify(fields) {
     return fields.map((field) => {
         const text = `${field.label || ""} ${field.helper || ""} ${field.placeholder || ""} ${field.aria || ""}`.toLocaleLowerCase();
         const type = String(field.type || "").toLocaleLowerCase();
         let profileKey = "none";
-        let confidence = 0.3;
         if (type === "email" || /\be-?mail\b|mail address/.test(text)) {
             profileKey = "email";
-            confidence = 0.75;
         }
         else if (/\badmin(istration)?\s*(no|number|#)?\b|\badmission\s*(no|number)\b/.test(text)) {
             profileKey = "adminNumber";
-            confidence = 0.72;
         }
         else if (/\bclass\b|\bgroup\b|\bform\b|\bcohort\b/.test(text)) {
             profileKey = "class";
-            confidence = 0.68;
         }
         else if (/\bname\b|名字|姓名/.test(text)) {
             profileKey = "name";
-            confidence = 0.7;
         }
-        return { fieldId: field.id, profileKey, confidence };
+        return { fieldId: field.id, profileKey };
     });
 }
 if (typeof module !== "undefined") {
@@ -156,7 +143,6 @@ if (typeof module !== "undefined") {
         buildPrompt,
         parseModelJson,
         normalizeProfileKey,
-        clampConfidence,
         fallbackClassify,
         warmModel,
         unloadModel

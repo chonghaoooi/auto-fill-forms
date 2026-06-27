@@ -37,7 +37,7 @@ async function loadState() {
     for (const key of ["name", "adminNumber", "class"]) {
         getInput(key).value = currentProfile[key] || "";
     }
-    for (const key of ["localModelBaseUrl", "modelName", "autofillThreshold", "suggestThreshold"]) {
+    for (const key of ["localModelBaseUrl", "modelName"]) {
         getInput(key).value = String(currentSettings[key] ?? "");
     }
     renderEmails();
@@ -89,16 +89,11 @@ function readProfile() {
 function readSettings() {
     return {
         localModelBaseUrl: getInput("localModelBaseUrl").value.trim() || DEFAULT_SETTINGS.localModelBaseUrl,
-        modelName: getInput("modelName").value.trim() || DEFAULT_SETTINGS.modelName,
-        autofillThreshold: Number(getInput("autofillThreshold").value),
-        suggestThreshold: Number(getInput("suggestThreshold").value)
+        modelName: getInput("modelName").value.trim() || DEFAULT_SETTINGS.modelName
     };
 }
 function validate(profile, settings) {
     const validationErrors = [];
-    if (profile.adminNumber && !/^\d{6}$/.test(profile.adminNumber)) {
-        validationErrors.push("Admin number must be exactly 6 digits.");
-    }
     if (profile.class && !/^[a-z0-9./ -]+$/i.test(profile.class)) {
         validationErrors.push("Class can use letters, numbers, spaces, dots, slashes, and hyphens.");
     }
@@ -108,16 +103,7 @@ function validate(profile, settings) {
     if (profile.emails.some((email) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
         validationErrors.push("Each email must be valid.");
     }
-    if (!validThreshold(settings.suggestThreshold) || !validThreshold(settings.autofillThreshold)) {
-        validationErrors.push("Thresholds must be numbers between 0 and 1.");
-    }
-    if (settings.suggestThreshold > settings.autofillThreshold) {
-        validationErrors.push("Suggest threshold must not exceed autofill threshold.");
-    }
     return validationErrors;
-}
-function validThreshold(value) {
-    return Number.isFinite(value) && value >= 0 && value <= 1;
 }
 function getInput(id) {
     return document.getElementById(id);

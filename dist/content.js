@@ -63,14 +63,9 @@
             if (!value) {
                 continue;
             }
-            if (result.confidence >= Number(state.settings.autofillThreshold ?? DEFAULT_SETTINGS.autofillThreshold)) {
-                setNativeValue(control, value);
-                if (result.profileKey === "email") {
-                    renderEmailChooser(control);
-                }
-            }
-            else if (result.confidence >= Number(state.settings.suggestThreshold ?? DEFAULT_SETTINGS.suggestThreshold)) {
-                renderSuggestion(control, result.profileKey, value);
+            setNativeValue(control, value);
+            if (result.profileKey === "email") {
+                renderEmailChooser(control);
             }
         }
     }
@@ -81,21 +76,6 @@
         }
         return state.profile[key] || "";
     }
-    function renderSuggestion(control, key, value) {
-        const bubble = makeBubble(control, "ai-autofill-suggestion");
-        bubble.innerHTML = "";
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = `Fill ${labelForKey(key)}`;
-        button.addEventListener("click", () => {
-            setNativeValue(control, value);
-            bubble.remove();
-            if (key === "email") {
-                renderEmailChooser(control);
-            }
-        });
-        bubble.append(button);
-    }
     function renderEmailChooser(control) {
         const emails = (state.profile.emails || []).filter(Boolean);
         if (emails.length < 2) {
@@ -103,17 +83,26 @@
         }
         const bubble = makeBubble(control, "ai-autofill-email-picker");
         bubble.innerHTML = "";
+        const title = document.createElement("div");
+        title.className = "ai-autofill-picker-title";
+        title.textContent = "Use another saved email";
+        bubble.append(title);
+        const list = document.createElement("div");
+        list.className = "ai-autofill-picker-list";
         for (const [index, email] of emails.entries()) {
             const button = document.createElement("button");
             button.type = "button";
+            button.className = index === state.profile.activeEmailIndex ? "is-active" : "";
             button.textContent = email;
             button.addEventListener("click", async () => {
                 setNativeValue(control, email);
                 state.profile.activeEmailIndex = index;
                 await chrome.storage.local.set({ profile: state.profile });
+                renderEmailChooser(control);
             });
-            bubble.append(button);
+            list.append(button);
         }
+        bubble.append(list);
     }
 })();
 function isFillable(element) {
@@ -210,29 +199,75 @@ function setNativeValue(control, value) {
     control.dispatchEvent(new Event("change", { bubbles: true }));
 }
 function makeBubble(control, className) {
+    ensureAutofillStyles();
     const existing = control.parentElement?.querySelector(`.${className}`);
     if (existing) {
         return existing;
     }
     const bubble = document.createElement("div");
     bubble.className = className;
-    bubble.style.cssText = "display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;font:12px system-ui,sans-serif;z-index:2147483647";
     control.insertAdjacentElement("afterend", bubble);
     return bubble;
-}
-function labelForKey(key) {
-    return {
-        name: "name",
-        adminNumber: "admin number",
-        class: "class",
-        email: "email"
-    }[key] || key;
 }
 function cssEscape(value) {
     if (typeof CSS !== "undefined" && CSS.escape) {
         return CSS.escape(value);
     }
     return String(value).replace(/["\\]/g, "\\$&");
+}
+function ensureAutofillStyles() {
+    if (document.getElementById("ai-autofill-inline-styles")) {
+        return;
+    }
+    const style = document.createElement("style");
+    style.id = "ai-autofill-inline-styles";
+    style.textContent = `
+    .ai-autofill-email-picker {
+      box-sizing: border-box;
+      max-width: 420px;
+      margin-top: 8px;
+      border: 1px solid #d6e2f0;
+      border-radius: 10px;
+      padding: 10px;
+      background: #ffffff;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+      color: #17202a;
+      font: 13px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      z-index: 2147483647;
+    }
+
+    .ai-autofill-picker-title {
+      margin-bottom: 8px;
+      color: #526173;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .ai-autofill-picker-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .ai-autofill-picker-list button {
+      width: 100%;
+      border: 1px solid #d8e2ef;
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #1f2937;
+      background: #f8fbff;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .ai-autofill-picker-list button:hover,
+    .ai-autofill-picker-list button.is-active {
+      border-color: #2f6fe4;
+      background: #edf4ff;
+      color: #174ea6;
+    }
+  `;
+    document.head.append(style);
 }
 function debounce(fn, delay) {
     let timer;

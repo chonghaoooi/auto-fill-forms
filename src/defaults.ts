@@ -7,8 +7,6 @@ type Profile = {
 };
 
 type Settings = {
-  autofillThreshold: number;
-  suggestThreshold: number;
   localModelBaseUrl: string;
   modelName: string;
 };
@@ -22,8 +20,6 @@ const DEFAULT_PROFILE: Profile = {
 };
 
 const DEFAULT_SETTINGS: Settings = {
-  autofillThreshold: 0.9,
-  suggestThreshold: 0.6,
   localModelBaseUrl: "http://localhost:11434",
   modelName: "qwen2.5:0.5b"
 };
