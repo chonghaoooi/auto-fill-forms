@@ -27,7 +27,7 @@ const DEFAULT_SETTINGS: Settings = {
   autofillThreshold: 0.9,
   suggestThreshold: 0.6,
   localModelBaseUrl: "http://localhost:11434",
-  modelName: "smollm3:3b"
+  modelName: "qwen2.5:0.5b"
 };
 
 const PROFILE_KEYS = ["name", "date", "adminNumber", "class", "email", "none"] as const;

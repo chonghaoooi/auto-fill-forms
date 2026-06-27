@@ -65,7 +65,7 @@ test("model lifecycle warms then unloads Ollama model", async () => {
   try {
     const settings = {
       localModelBaseUrl: "http://localhost:11434",
-      modelName: "smollm3:3b",
+      modelName: "qwen2.5:0.5b",
       autofillThreshold: 0.9,
       suggestThreshold: 0.6
     };
